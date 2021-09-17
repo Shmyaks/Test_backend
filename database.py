@@ -1,14 +1,17 @@
-from typing import Optional
+import typing
+from typing import Dict, 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, relationship
-from main import config
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Integer, Date, ForeignKey, Table
+from sqlalchemy import Column, String, Integer, Date, ForeignKey
+import requests
+import os
 
-engine_sql_lite= create_engine("sqlite:///database.db", connect_args={
+engine_sql_lite= create_engine(os.environ.get('sql_db'), connect_args={
                        "check_same_thread": False})
 Session = sessionmaker(bind=engine_sql_lite)
 Base = declarative_base(bind=engine_sql_lite)
+
 
 def get_db():
     db = Session()
@@ -19,14 +22,33 @@ def get_db():
 
 
 class Doc(Base):
-    __tablename__ = "news"
+    __tablename__ = "doc"
     id = Column(Integer, primary_key=True)
     text = Column(String(1024))
-    date = Column(Date)
+    date = Column(Date)     
     tags = relationship("Rubric", lazy='joined')
 
 
 class Rubric(Base):
-    __tablename__ = "rubrics"
+    __tablename__ = "rubric"
     id = Column(Integer, primary_key=True)
     name = Column(String(64))
+    doc_id = Column(Integer, ForeignKey('doc.id'))  
+
+
+class Elastic():
+    _index = 'my-docs'
+    _host = os.environ.get('host_elastic')
+
+    @staticmethod
+    def create(query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> None:
+        requests.post(url=Elastic._host + f"/{Elastic._index}/_doc/", params=query_params, json=body_params)
+    
+    @staticmethod
+    def search(id: int, query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> None:
+        requests.get(url=Elastic._host + f"/{Elastic._index}/_search/", params=query_params, json=body_params)
+    
+    @staticmethod
+    def delete(id: int) -> None:
+        requests.delete(url=Elastic._host + f"/{Elastic._index}/_doc/{id}")
+    
