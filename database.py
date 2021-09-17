@@ -1,9 +1,8 @@
 import typing
-from typing import Dict, 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Integer, Date, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
 import requests
 import os
 
@@ -25,8 +24,8 @@ class Doc(Base):
     __tablename__ = "doc"
     id = Column(Integer, primary_key=True)
     text = Column(String(1024))
-    date = Column(Date)     
-    tags = relationship("Rubric", lazy='joined')
+    date = Column(DateTime)     
+    rubrics = relationship("Rubric", lazy='joined')
 
 
 class Rubric(Base):
@@ -45,7 +44,7 @@ class Elastic():
         requests.post(url=Elastic._host + f"/{Elastic._index}/_doc/", params=query_params, json=body_params)
     
     @staticmethod
-    def search(id: int, query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> None:
+    def search(query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> None:
         requests.get(url=Elastic._host + f"/{Elastic._index}/_search/", params=query_params, json=body_params)
     
     @staticmethod
