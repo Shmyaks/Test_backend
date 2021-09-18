@@ -1,20 +1,27 @@
 from typing import List
 from pydantic import BaseModel
-from datetime import  datetime
+from datetime import  date
 from typing import List, Optional
 
 
 class RubricModel(BaseModel):
-    id: int
     name: str
 
 
 class DocModel(BaseModel):
     id: int
-    text: int
-    rubrics: List[RubricModel]
-    date: datetime
+    text: str
+    rubrics: List
+    date: date
 
+    class Config:
+        orm_mode = True
 
 class ListDocModel(BaseModel):
-    docs = List[DocModel]
+    docs: List[DocModel]
+
+class SuccessModel(BaseModel):
+    message = "Success"
+
+class DocsModels(BaseModel):
+    docs: List[DocModel] = []
