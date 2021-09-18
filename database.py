@@ -2,7 +2,7 @@ import typing
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
+from sqlalchemy import Column, String, Integer, Date, ForeignKey
 import requests
 import os
 
@@ -24,7 +24,7 @@ class Doc(Base):
     __tablename__ = "doc"
     id = Column(Integer, primary_key=True)
     text = Column(String(1024))
-    date = Column(DateTime)     
+    date = Column(Date)     
     rubrics = relationship("Rubric", lazy='joined')
 
 
@@ -36,18 +36,20 @@ class Rubric(Base):
 
 
 class Elastic():
-    _index = 'my-docs'
+    _index = 'docs'
     _host = os.environ.get('host_elastic')
 
     @staticmethod
-    def create(query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> None:
-        requests.post(url=Elastic._host + f"/{Elastic._index}/_doc/", params=query_params, json=body_params)
+    def create(id: int, query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> None:
+        return requests.post(url=Elastic._host + f"/{Elastic._index}/_doc/{id}", params=query_params, json=body_params).json()
     
     @staticmethod
-    def search(query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> None:
-        requests.get(url=Elastic._host + f"/{Elastic._index}/_search/", params=query_params, json=body_params)
+    def search(query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None):
+        return requests.get(url=Elastic._host + f"/{Elastic._index}/_search/", params=query_params, json=body_params).json()
     
     @staticmethod
     def delete(id: int) -> None:
         requests.delete(url=Elastic._host + f"/{Elastic._index}/_doc/{id}")
     
+# Создаём таблицы.
+Base.metadata.create_all(engine_sql_lite)
