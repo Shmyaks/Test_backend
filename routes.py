@@ -7,6 +7,7 @@ from fastapi.responses import ORJSONResponse
 from fastapi import Depends
 import requests
 
+
 @app.post("/create", tags=["docs"], response_model=DocModel, response_class=ORJSONResponse)
 def create_docs(text: str, rubrics: list, date: date, db: Session = Depends(get_db)):
     """Создание документа"""
@@ -26,15 +27,15 @@ def get_docs(db: Session = Depends(get_db), text: str = None, limit: int = 20):
         * text = None выдача документов без поиска текста в документе.
     """
 
-    filter = (None==None)
+    filter = (None == None)
     if text is not None:
         body = {
             "query": {
                 "match": {
                     "text": text
-                    }
                 }
             }
+        }
 
         search = Elastic.search(body_params=body)
         id = [doc['_id'] for doc in search['hits']['hits']]
@@ -62,7 +63,7 @@ def delete_doc(id: int, db: Session = Depends(get_db)):
     Elastic.delete(id=id)
     db.commit()
 
-    return {'message':'Success'}
+    return {'message': 'Success'}
 
 
 @app.post("/tests/create", tags=["Tests"], response_model=DocsModels, response_class=ORJSONResponse)
@@ -70,11 +71,13 @@ def test_create_docs(db: Session = Depends(get_db), count: int = 10):
     """Создание рандомных документов"""
 
     rubrics = ["Первая рубрика", "Вторая рубрика", "Третья рубрика"]
-    random_date = [date(2005, 9, 10),date(2005, 9, 11),date(2005, 9, 12),date(2005, 9, 13),date(2005, 9, 14),date(2005, 9, 15)]
+    random_date = [date(2005, 9, 10), date(2005, 9, 11), date(
+        2005, 9, 12), date(2005, 9, 13), date(2005, 9, 14), date(2005, 9, 15)]
     docs = []
     for i in range(count):
         text = requests.get("https://fish-text.ru/get").json()
-        doc = Doc(text=text['text'], date=random_date[random.randint(0,len(random_date)-1)])
+        doc = Doc(
+            text=text['text'], date=random_date[random.randint(0, len(random_date)-1)])
         db.add(doc)
         doc.rubrics.extend([Rubric(name=name) for name in rubrics])
         db.commit()

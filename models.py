@@ -1,6 +1,6 @@
 from typing import List
 from pydantic import BaseModel
-from datetime import  date
+from datetime import date
 from typing import List, Optional
 
 
@@ -17,11 +17,14 @@ class DocModel(BaseModel):
     class Config:
         orm_mode = True
 
+
 class ListDocModel(BaseModel):
     docs: List[DocModel]
 
+
 class SuccessModel(BaseModel):
     message = "Success"
+
 
 class DocsModels(BaseModel):
     docs: List[DocModel] = []
