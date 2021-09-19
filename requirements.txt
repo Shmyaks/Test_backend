@@ -1,6 +1,7 @@
-uvicorn==0.14.0
+uvicorn
 requests
 fastapi==0.66.0
 pydantic==1.8.2
 SQLAlchemy==1.4.23
 orjson==3.6.3
+typing
