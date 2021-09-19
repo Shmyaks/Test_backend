@@ -12,6 +12,7 @@ Session = sessionmaker(bind=engine_sql_lite)
 Base = declarative_base(bind=engine_sql_lite)
 
 
+#Вместе с Depends (Закрываем сессию автоматически)
 def get_db():
     db = Session()
     try:
@@ -35,16 +36,17 @@ class Rubric(Base):
     doc_id = Column(Integer, ForeignKey('doc.id'))  
 
 
+#Обычный интерфейс Elastic
 class Elastic():
     _index = 'docs'
     _host = os.environ.get('host_elastic')
 
     @staticmethod
     def create(id: int, query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> None:
-        return requests.post(url=Elastic._host + f"/{Elastic._index}/_doc/{id}", params=query_params, json=body_params).json()
+        requests.post(url=Elastic._host + f"/{Elastic._index}/_doc/{id}", params=query_params, json=body_params)
     
     @staticmethod
-    def search(query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None):
+    def search(query_params: typing.Optional[dict] = None, body_params: typing.Optional[dict] = None) -> dict:
         return requests.get(url=Elastic._host + f"/{Elastic._index}/_search/", params=query_params, json=body_params).json()
     
     @staticmethod
